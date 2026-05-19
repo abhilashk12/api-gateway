@@ -17,41 +17,5 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     private final JwtUtil jwtUtil;
 
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
-        String path = exchange.getRequest().getURI().getPath();
-
-        // Allow auth endpoints
-        if (path.contains("/auth")) {
-            return chain.filter(exchange);
-        }
-
-        List<String> authHeaders = exchange.getRequest().getHeaders().get("Authorization");
-
-        if (authHeaders == null || authHeaders.isEmpty()) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
-        }
-
-        String token = authHeaders.get(0).replace("Bearer ", "");
-
-        try {
-            Claims claims = jwtUtil.validateToken(token);
-
-            String role = claims.get("role", String.class);
-
-            // Example role check
-            if (path.contains("/products") && !"ROLE_ADMIN".equals(role)) {
-                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                return exchange.getResponse().setComplete();
-            }
-
-        } catch (Exception e) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
-        }
-
-        return chain.filter(exchange);
-    }
+   
 }
